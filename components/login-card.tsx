@@ -14,51 +14,83 @@ import { Switch } from "./ui/switch";
 import { useToast } from "./ui/use-toast";
 import { ToastAction } from "./ui/toast";
 import { GoogleIcon } from "./icons";
+import React, { SyntheticEvent, useState } from "react";
+import {useRouter} from "next/navigation";
 
-export default function LoginCard() {
+const LoginCard = () => {
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const router = useRouter();
   const { toast } = useToast();
 
+  const submit = async (e: SyntheticEvent) => {
+    
+    e.preventDefault();
+    const login = await fetch('http://127.0.0.1:8000/api/auth/login', {
+      method: "POST",
+      credentials: 'include',
+      headers: {'Content-Type':  'application/json'},
+      body: JSON.stringify({
+        email, password
+      })
+    });
+
+    if(!login.ok){
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem with your request.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      })
+    }
+    else{
+      const session = await login.json();
+      const token = session.token;
+      sessionStorage.setItem('token', token)
+      toast({
+        title: "Login Sucessfull!",
+      })
+      await router.push('/dashboard')
+    }
+    
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Login</CardTitle>
-        <CardDescription>
-          Login to your account and continue creating great stuff!
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-1">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email"/>
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="password">Password</Label>
-          <Input id="password" type="password" />
-        </div>
-        <div className="flex items-center space-x-2">
-          <Label htmlFor="remember-me">Remember me</Label>
-          <Switch id="remember-me" />
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-end">
-        <Button variant="outline">
-            <GoogleIcon className="mr-2 h-4 w-4" />
-            Login with Google
-        </Button>
-        <Button
-          onClick={() => {
-            toast({
-              title: "Scheduled: Catch up ",
-              description: "Friday, February 10, 2023 at 5:57 PM",
-              action: (
-                <ToastAction altText="Goto schedule to undo">Undo</ToastAction>
-              ),
-            });
-          }}
-        >
-          Login
-        </Button>
-      </CardFooter>
-    </Card>
+      <Card>
+        <form onSubmit={submit}>
+          <CardHeader>
+            <CardTitle>Login</CardTitle>
+            <CardDescription>
+              Login to your account and continue creating great stuff!
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-1">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" onChange={e => setEmail(e.target.value)} required/>
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="password">Password</Label>
+              <Input id="password" type="password" onChange={e => setPassword(e.target.value)} required/>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="remember-me">Remember me</Label>
+              <Switch id="remember-me" />
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-end">
+            <Button className="w-full">Login</Button>
+          </CardFooter>
+        </form>
+        <CardFooter className="flex justify-end">
+          <Button className="w-full" variant="outline">
+              <GoogleIcon className="mr-2 h-4 w-4" />
+              Login with Google
+          </Button>
+        </CardFooter>
+      </Card>
   );
 }
+
+export default LoginCard;
