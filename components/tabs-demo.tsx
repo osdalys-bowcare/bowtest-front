@@ -11,8 +11,8 @@ import {
     return (
       <Tabs defaultValue="account" className="w-[400px]">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="account">Login</TabsTrigger>
-          <TabsTrigger value="password">Register</TabsTrigger>
+          <TabsTrigger value="account">Inicio de Sesión</TabsTrigger>
+          <TabsTrigger value="password">Registro</TabsTrigger>
         </TabsList>
         <TabsContent value="account">
           <LoginCard />

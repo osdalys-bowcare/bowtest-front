@@ -49,6 +49,7 @@ const LoginCard = () => {
       const token = session.token;
       sessionStorage.setItem('token', token)
       toast({
+        className: "bg-green-600 text-white",
         title: "Login Sucessfull!",
       })
       await router.push('/dashboard')
@@ -60,33 +61,29 @@ const LoginCard = () => {
       <Card>
         <form onSubmit={submit}>
           <CardHeader>
-            <CardTitle>Login</CardTitle>
+            <CardTitle>Inicio de Sesión</CardTitle>
             <CardDescription>
-              Login to your account and continue creating great stuff!
+             Accede a tu cuenta y disfruta de nuestros servicios!
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Correo</Label>
               <Input id="email" onChange={e => setEmail(e.target.value)} required/>
             </div>
             <div className="space-y-1">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Contraseña</Label>
               <Input id="password" type="password" onChange={e => setPassword(e.target.value)} required/>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="remember-me">Remember me</Label>
-              <Switch id="remember-me" />
             </div>
           </CardContent>
           <CardFooter className="flex justify-end">
-            <Button className="w-full">Login</Button>
+            <Button className="w-full">Iniciar Sesión</Button>
           </CardFooter>
         </form>
         <CardFooter className="flex justify-end">
           <Button className="w-full" variant="outline">
               <GoogleIcon className="mr-2 h-4 w-4" />
-              Login with Google
+              Iniciar Sesión con Google
           </Button>
         </CardFooter>
       </Card>

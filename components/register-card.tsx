@@ -47,6 +47,7 @@ import {
         const token = session.token;
         sessionStorage.setItem('token', token)
         toast({
+          className: "bg-green-600 text-white",
           title: "Register Sucessfull!",
         })
         await router.push('/dashboard')
@@ -58,33 +59,33 @@ import {
       <Card>
         <form onSubmit={submit}>
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl">Create an account</CardTitle>
+            <CardTitle className="text-2xl">Registro</CardTitle>
             <CardDescription>
-              Enter your email below to create your account
+              Crea una cuenta y descubre nuestros servicios!
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
               <div className="grid gap-2">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" type="name" placeholder="Enter your name" onChange={e => setName(e.target.value)} required/>
+              <Label htmlFor="name">Nombre y Apellido</Label>
+              <Input id="name" type="name" placeholder="Ingresa tu nombre y apellido" onChange={e => setName(e.target.value)} required/>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="Enter your email" onChange={e => setEmail(e.target.value)} required/>
+              <Input id="email" type="email" placeholder="Ingresa tu correo" onChange={e => setEmail(e.target.value)} required/>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="Your password" onChange={e => setPassword(e.target.value)} required/>
+              <Input id="password" type="password" placeholder="Ingresa tu contraseña" onChange={e => setPassword(e.target.value)} required/>
             </div>
           </CardContent>
           <CardFooter>
-            <Button className="w-full">Create account</Button>
+            <Button className="w-full">Crea tu cuenta</Button>
           </CardFooter>
         </form>
         <CardFooter>
           <Button className="w-full" variant="outline">
               <GoogleIcon className="mr-2 h-4 w-4" />
-              Sign Up with Google
+              Registrate con Google
             </Button>
         </CardFooter>
       </Card>
