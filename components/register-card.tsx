@@ -1,4 +1,15 @@
 "use client";
+import { useForm } from "react-hook-form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
     Card,
     CardContent,
@@ -7,7 +18,6 @@ import {
     CardHeader,
     CardTitle,
   } from "@/components/ui/card";
-  import { Label } from "@/components/ui/label";
   import { Input } from "@/components/ui/input";
   import { Button } from "@/components/ui/button";
   import { useToast } from "./ui/use-toast";
@@ -16,48 +26,67 @@ import {
   import React, { SyntheticEvent, useState } from "react";
   import {useRouter} from "next/navigation";
 
+  const FormSchema = z.object({
+    name: z.string().min(1, "El nombre y apellido es requerido"),
+    email: z.string().min(1, "El correo es requerido!").email("Correo inválido!"),
+    password: z
+      .string()
+      .min(1, "La contraseña es requerida!")
+      .min(8, "La contraseña debe contener al menos 8 caracteres!"),
+  });
+
   const RegisterCard = () => {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const router = useRouter();
     const { toast } = useToast();
+    const form = useForm<z.infer<typeof FormSchema>>({
+      resolver: zodResolver(FormSchema),
+      defaultValues: {
+        name: "",
+        email: "",
+        password: "",
+      },
+    });
 
-    const submit = async (e: SyntheticEvent) => {
-    
-      e.preventDefault();
-      const register = await fetch('http://127.0.0.1:8000/api/auth/register', {
-        method: "POST",
-        headers: {'Content-Type':  'application/json'},
-        body: JSON.stringify({
-          name, email, password
-        })
-      });
+    const onSubmit = async (values: z.infer<typeof FormSchema>) => {
+      try {
+        const registerData = await fetch('http://127.0.0.1:8000/api/auth/register', {
+          method: "POST",
+          headers: {'Content-Type':  'application/json'},
+          body: JSON.stringify(values)
+        });
 
-      if(!register.ok){
+        if(!registerData.ok){
+          toast({
+            variant: "destructive",
+            title: "Error!",
+            description: "Ha ocurrido un error. Revise todos los campos",
+            action: <ToastAction altText="Cerrar">Cerrar</ToastAction>,
+          })
+        }
+        else{
+          const session = await registerData.json();
+          const token = session.token;
+          sessionStorage.setItem('token', token)
+          toast({
+            className: "bg-green-600 text-white",
+            title: "Registro Exitoso!",
+          })
+          await router.push('/dashboard')
+        }
+
+      } catch (error) {
         toast({
           variant: "destructive",
-          title: "Uh oh! Something went wrong.",
-          description: "There was a problem with your request.",
-          action: <ToastAction altText="Try again">Try again</ToastAction>,
-        })
+          title: "Error",
+          description: "Ocurrio un error! Intente más tarde",
+        });
       }
-      else{
-        const session = await register.json();
-        const token = session.token;
-        sessionStorage.setItem('token', token)
-        toast({
-          className: "bg-green-600 text-white",
-          title: "Register Sucessfull!",
-        })
-        await router.push('/dashboard')
-      }
-
-    }
+    };
   
     return (
       <Card>
-        <form onSubmit={submit}>
+        <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl">Registro</CardTitle>
             <CardDescription>
@@ -66,22 +95,63 @@ import {
           </CardHeader>
           <CardContent className="grid gap-4">
               <div className="grid gap-2">
-              <Label htmlFor="name">Nombre y Apellido</Label>
-              <Input id="name" type="name" placeholder="Ingresa tu nombre y apellido" onChange={e => setName(e.target.value)} required/>
+              <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre y Apellido</FormLabel>
+                  <FormControl>
+                    <Input placeholder="John Doe" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+              />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="Ingresa tu correo" onChange={e => setEmail(e.target.value)} required/>
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Ingrese su correo"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+              />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="Ingresa tu contraseña" onChange={e => setPassword(e.target.value)} required/>
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contraseña</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Ingrese su contraseña"
+                      type="password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+              />
             </div>
           </CardContent>
           <CardFooter>
             <Button className="w-full">Crea tu cuenta</Button>
           </CardFooter>
         </form>
+        </Form>
         <CardFooter>
           <Button className="w-full" variant="outline">
               <GoogleIcon className="mr-2 h-4 w-4" />
@@ -90,6 +160,6 @@ import {
         </CardFooter>
       </Card>
     );
-  };
+}
 
   export default RegisterCard;
