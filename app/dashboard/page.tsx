@@ -7,25 +7,31 @@ import { useToast } from "@/components/ui/use-toast";
 import { signOut, useSession } from "next-auth/react";
 
 export default function DashboardPage() {
+    //Inicializacion de constantes
     const [message, setMessage] = useState('');
     const [auth, setAuth] = useState(false);
     const router = useRouter();
     const { toast } = useToast();
     const {data, status} = useSession();
 
+    //Funcion de logout
     const logout = async () => {
+        //Conexion al la ruta backend logout
         await fetch('http://localhost:8000/api/auth/logout', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             credentials: 'include',
         })
+        //Elimina cualquier token existente en la sesion
         sessionStorage.removeItem('token');
-        setAuth(false);
+        //Ejecuta la funcion de signout
         signOut({ callbackUrl: '/' });
+        //Mensaje exitoso de cierre de sesion
         toast({
           className: "bg-green-600 text-white",
           title: "Logout Sucessfull!",
         })
+        //Redireccion a la ruta principal
         await router.push('/');
     }
 
@@ -45,9 +51,7 @@ export default function DashboardPage() {
 
                     const content = await response.json();
                     setMessage(`${content.name}`);
-                    setAuth(true);
                 } catch (e) {
-                    setAuth(false);
                     return router.push('/');
                 }
             }

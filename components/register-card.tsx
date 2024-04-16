@@ -25,7 +25,9 @@ import {
   import { GoogleIcon } from "./icons";
   import React, { SyntheticEvent, useState } from "react";
   import {useRouter} from "next/navigation";
+  import { signIn, useSession } from "next-auth/react";
 
+  //Validacion de ingreso de datos
   const FormSchema = z.object({
     name: z.string().min(1, "El nombre y apellido es requerido"),
     email: z.string().min(1, "El correo es requerido!").email("Correo inválido!"),
@@ -36,8 +38,10 @@ import {
   });
 
   const RegisterCard = () => {
+    //Inicializacion de constantes
     const router = useRouter();
     const { toast } = useToast();
+    const session = useSession();
     const form = useForm<z.infer<typeof FormSchema>>({
       resolver: zodResolver(FormSchema),
       defaultValues: {
@@ -47,14 +51,17 @@ import {
       },
     });
 
+    //Funcion de registro por correo y contraseña
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
       try {
+        //Conecta a la ruta backend register con los datos ingresadas
         const registerData = await fetch('http://127.0.0.1:8000/api/auth/register', {
           method: "POST",
           headers: {'Content-Type':  'application/json'},
           body: JSON.stringify(values)
         });
 
+        //Si alguno de los datos es erroneo, muestra mensaje de error
         if(!registerData.ok){
           toast({
             variant: "destructive",
@@ -63,6 +70,7 @@ import {
             action: <ToastAction altText="Cerrar">Cerrar</ToastAction>,
           })
         }
+        //Sino, envia un token a la session, muestra un mensaje exitoso, y redirecciona al dashboard
         else{
           const session = await registerData.json();
           const token = session.token;
@@ -82,6 +90,26 @@ import {
         });
       }
     };
+
+  //Funcion de registro por Google
+  function handleSignInWithGoogle() {
+    //Peticion a google para autenticacion
+    signIn('google', { callbackUrl: '/dashboard' })
+      .then((response) => {
+        // Aquí puedes acceder al token de sesión y guardarlo en sessionStorage
+        const dataToken = useSession();
+        const token = dataToken?.data?.user?.idToken;
+        if (token) {
+          // Guardar el token en sessionStorage
+          sessionStorage.setItem('token', token);
+          // Redirigir al usuario al dashboard
+          return router.push('/dashboard')
+        }
+      })
+      .catch((error) => {
+        console.error('Error al iniciar sesión con Google:', error);
+      });
+  }
   
     return (
       <Card>
@@ -153,7 +181,7 @@ import {
         </form>
         </Form>
         <CardFooter>
-          <Button className="w-full" variant="outline">
+          <Button className="w-full" variant="outline" onClick={handleSignInWithGoogle}>
               <GoogleIcon className="mr-2 h-4 w-4" />
               Registrate con Google
             </Button>

@@ -25,7 +25,7 @@ import { GoogleIcon } from "./icons";
 import {useRouter} from "next/navigation";
 import {SessionProvider, signIn, useSession} from 'next-auth/react';
 
-
+//Validacion de ingreso de datos
 const FormSchema = z.object({
   email: z.string().min(1, "El correo es requerido!").email("Correo inválido!"),
   password: z
@@ -36,6 +36,7 @@ const FormSchema = z.object({
 
 
 const LoginCard = () => {
+  //Inicializacion de constantes
   const router = useRouter();
   const session = useSession();
   const { toast } = useToast();
@@ -47,8 +48,10 @@ const LoginCard = () => {
     },
   });
 
+  //Funcion de Login por correo y contraseña
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
     try {
+      //Conecta a la ruta backend login con las credenciales ingresadas
       const loginData = await fetch("http://127.0.0.1:8000/api/auth/login", {
         method: "POST",
         credentials: 'include',
@@ -56,12 +59,14 @@ const LoginCard = () => {
         body: JSON.stringify(values)
       });
 
+      //Si el correo y/o contraseña son invalidos, muestra mensaje de error
       if (!loginData.ok) {
         toast({
           variant: "destructive",
           title: "Error!",
           description: "El correo y/o la contraseña son inválidos" ,
         })
+      //Sino, envia un token a la session, muestra un mensaje exitoso, y redirecciona al dashboard
       }else{
         const session = await loginData.json();
         const token = session.token;
@@ -81,7 +86,9 @@ const LoginCard = () => {
     }
   };
 
+  //Funcion de login por Google
   function handleSignInWithGoogle() {
+    //Peticion a google para autenticacion
     signIn('google', { callbackUrl: '/dashboard' })
       .then((response) => {
         // Aquí puedes acceder al token de sesión y guardarlo en sessionStorage
@@ -90,7 +97,7 @@ const LoginCard = () => {
         if (token) {
           // Guardar el token en sessionStorage
           sessionStorage.setItem('token', token);
-          // Redirigir al usuario a la ruta deseada
+          // Redirigir al usuario al dashboard
           return router.push('/dashboard')
         }
       })
