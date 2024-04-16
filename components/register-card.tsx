@@ -102,7 +102,7 @@ import {
                 <FormItem>
                   <FormLabel>Nombre y Apellido</FormLabel>
                   <FormControl>
-                    <Input placeholder="John Doe" {...field} />
+                    <Input placeholder="Ej: John Doe" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -118,7 +118,7 @@ import {
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Ingrese su correo"
+                      placeholder="Ej: john@correo.com"
                       {...field}
                     />
                   </FormControl>

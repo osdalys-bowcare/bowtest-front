@@ -4,12 +4,14 @@ import {useEffect, useState} from "react";
 import { Button } from "@/components/ui/button";
 import {useRouter} from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
+import { signOut, useSession } from "next-auth/react";
 
 export default function DashboardPage() {
     const [message, setMessage] = useState('');
     const [auth, setAuth] = useState(false);
     const router = useRouter();
     const { toast } = useToast();
+    const {data, status} = useSession();
 
     const logout = async () => {
         await fetch('http://localhost:8000/api/auth/logout', {
@@ -19,6 +21,7 @@ export default function DashboardPage() {
         })
         sessionStorage.removeItem('token');
         setAuth(false);
+        signOut({ callbackUrl: '/' });
         toast({
           className: "bg-green-600 text-white",
           title: "Logout Sucessfull!",
@@ -26,7 +29,8 @@ export default function DashboardPage() {
         await router.push('/');
     }
 
-    useEffect(() => {
+    if (typeof window !== 'undefined' && sessionStorage.getItem('token')) {
+      useEffect(() => {
         (
             async () => {
                 try {
@@ -48,12 +52,9 @@ export default function DashboardPage() {
                 }
             }
         )();
-    });
-    
-  if (!sessionStorage.getItem('token')) {
-    return router.push('/')
-  }
-  else {
+      });
+    }
+
     return (
       <>
         <div className="hidden flex-col md:flex">
@@ -72,12 +73,11 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="flex items-center justify-between space-y-2">
-              <h4 className="text-3xl tracking-tight">Bienvenido(a) {message}</h4>
+              <h4 className="text-3xl tracking-tight">Bienvenido(a) {data?.user?.name} {message}
+              </h4>
             </div>
           </div>
         </div>
       </>
     )
-  }
-
 }

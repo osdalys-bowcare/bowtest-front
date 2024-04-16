@@ -21,10 +21,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "./ui/use-toast";
-import { ToastAction } from "./ui/toast";
 import { GoogleIcon } from "./icons";
-import React, { SyntheticEvent, useState } from "react";
 import {useRouter} from "next/navigation";
+import {SessionProvider, signIn, useSession} from 'next-auth/react';
 
 
 const FormSchema = z.object({
@@ -35,8 +34,10 @@ const FormSchema = z.object({
     .min(8, "La contraseña debe contener al menos 8 caracteres!"),
 });
 
+
 const LoginCard = () => {
   const router = useRouter();
+  const session = useSession();
   const { toast } = useToast();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -59,8 +60,7 @@ const LoginCard = () => {
         toast({
           variant: "destructive",
           title: "Error!",
-          description: "El correo y/o la contraseña son inválidos",
-          action: <ToastAction altText="Cerrar">Cerrar</ToastAction>,
+          description: "El correo y/o la contraseña son inválidos" ,
         })
       }else{
         const session = await loginData.json();
@@ -81,6 +81,24 @@ const LoginCard = () => {
     }
   };
 
+  function handleSignInWithGoogle() {
+    signIn('google', { callbackUrl: '/dashboard' })
+      .then((response) => {
+        // Aquí puedes acceder al token de sesión y guardarlo en sessionStorage
+        const dataToken = useSession();
+        const token = dataToken?.data?.user?.idToken;
+        if (token) {
+          // Guardar el token en sessionStorage
+          sessionStorage.setItem('token', token);
+          // Redirigir al usuario a la ruta deseada
+          return router.push('/dashboard')
+        }
+      })
+      .catch((error) => {
+        console.error('Error al iniciar sesión con Google:', error);
+      });
+  }
+
   return (
       <Card>
         <Form {...form}>
@@ -100,7 +118,7 @@ const LoginCard = () => {
                 <FormItem>
                   <FormLabel>Correo</FormLabel>
                   <FormControl>
-                    <Input placeholder="mail@example.com" {...field} />
+                    <Input placeholder="Ingrese su correo" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -116,7 +134,7 @@ const LoginCard = () => {
                   <FormLabel>Contraseña</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Enter your password"
+                      placeholder="Ingrese su contraseña"
                       type="password"
                       {...field}
                     />
@@ -133,7 +151,7 @@ const LoginCard = () => {
         </form>
         </Form>
         <CardFooter className="flex justify-end">
-          <Button className="w-full" variant="outline">
+          <Button className="w-full" variant="outline" onClick={handleSignInWithGoogle}>
               <GoogleIcon className="mr-2 h-4 w-4" />
               Iniciar Sesión con Google
           </Button>

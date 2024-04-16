@@ -1,10 +1,9 @@
-//import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toaster";
-//import { ThemeProvider } from "@/components/theme-provider";
+import { Providers } from "./Providers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,8 +25,10 @@ export default function RootLayout({
           inter.className
         )}
       >
+        <Providers>
           {children}
           <Toaster />
+        </Providers>
       </body>
     </html>
   );
